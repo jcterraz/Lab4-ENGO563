@@ -6,21 +6,8 @@ Course: ENGO 553
 Lab 4:*/
 
 #include "Lab4.h";
-void lab_1(MatrixXd &Res, MatrixXd &P, MatrixXd &A)
+void least_squares(MatrixXd &Res, MatrixXd &P, MatrixXd &A, vector<angles> ang_data, vector<distances> dist_data, vector<coordinates> coords_data, double std_ang, double std_dist)
 {
-	// Read needed files with observations and coordinates
-	vector<angles> ang_data;
-	ang_data = read_ang_files("Angles.txt");
-
-	vector<distances> dist_data;
-	dist_data = read_dist_files("Distances.txt");
-
-	vector<coordinates> coords_data;
-	coords_data = read_coords_files("Coordinates.txt");
-
-	// Given STDs from observations
-	double std_ang = 1.5;
-	double std_dist = 2;
 
 // Obtain weight matrix
 P = compute_P_matrix(ang_data, dist_data, std_ang, std_dist);
@@ -69,9 +56,6 @@ while (tresh == false)
 	coords_data.at(4).x = Unk(2, 0);
 	coords_data.at(4).y = Unk(3, 0);
 }
-output_matrix("Lab1_P.txt", P);
-output_matrix("Lab1_A.txt", A);
-output_matrix("Lab1_Unk.txt", Unk);
 
 // Obtain Residuals
 Res = A*S + W;
@@ -85,14 +69,14 @@ for (int i = 0; i < (ang_data.size() + dist_data.size()); i++)
 	if (i < ang_data.size())
 		l(i, 0) = ((ang_data.at(i).degrees) + (ang_data.at(i).minutes / 60) + ang_data.at(i).seconds / 3600)*PI / 180;
 	else
-		l(i, 0) = dist_data.at(i - 12).distance;
+		l(i, 0) = dist_data.at(i - ang_data.size()).distance;
 }
 
 // Obtain Residuals
 MatrixXd l_hat = l + Res;
 };
 
-MatrixXd snooping_method(MatrixXd v, MatrixXd P, MatrixXd A, double apriori, double Chi, double K)
+MatrixXd snooping_method(MatrixXd v, MatrixXd P, MatrixXd A, double apriori, double Chi, double K, bool &check, int &obs_del)
 {
 	// Global Test
 	double T = (v.transpose() * P * v)(0, 0) / apriori;
@@ -100,21 +84,39 @@ MatrixXd snooping_method(MatrixXd v, MatrixXd P, MatrixXd A, double apriori, dou
 
 	// Local Test 
 	MatrixXd w(v.rows(), 1), Q_v;
+	bool global_check = false;
+	int max = 0;
 	if (T > Chi)
 	{
 		cout << "Global Test Failed: Blunder Detected" << endl;
 		Q_v = P.inverse() - A*(A.transpose() * P * A).inverse() * A.transpose();
-
+		
 		for (int i = 0; i < v.rows(); i++)
 		{
 			w(i, 0) = v(i, 0) / (sqrt(apriori)*sqrt(Q_v(i, i)));
-			if (abs(w(i, 0)) > K)
+			if (i > 0)
 			{
-				cout << "Observation " << i + 1 << " failed" << endl;
+				if (abs(w(i, 0)) > abs(w(max, 0)))
+				{
+					max = i;
+				}
 			}
 		}
-		output_matrix("w.txt", w);
+		obs_del = max;
+		cout << "Highest blunder in observation: "<< max+1 << endl;
 	}
+	else
+	{
+		cout << "Global Test Successfull" << endl;
+		Q_v = P.inverse() - A*(A.transpose() * P * A).inverse() * A.transpose();
+		check = true;
+		for (int i = 0; i < v.rows(); i++)
+		{
+			w(i, 0) = v(i, 0) / (sqrt(apriori)*sqrt(Q_v(i, i)));
+		}
+		output_matrix("Blunders_Final.txt", w);
+	}
+
 	return Q_v;
 };
 

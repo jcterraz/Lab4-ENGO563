@@ -37,25 +37,25 @@ void compute_A_matrix(MatrixXd& A, vector<angles> ang_data, vector<distances> di
 		if (dist.at(i).id1 == "P1" || dist.at(i).id2 == "P1")
 		{
 			VectorXd temp = delta_dist(dist.at(i), coords, "P1");
-			A(i + 12, 0) = temp(0);
-			A(i + 12, 1) = temp(1);
+			A(i + ang_data.size(), 0) = temp(0);
+			A(i + ang_data.size(), 1) = temp(1);
 		}
 		else
 		{
-			A(i + 12, 0) = 0;
-			A(i + 12, 1) = 0;
+			A(i + ang_data.size(), 0) = 0;
+			A(i + ang_data.size(), 1) = 0;
 			
 		}
 		if (dist.at(i).id1 == "P2" || dist.at(i).id2 == "P2")
 		{
 			VectorXd temp = delta_dist(dist.at(i), coords, "P2");
-			A(i + 12, 2) = temp(0);
-			A(i + 12, 3) = temp(1);
+			A(i + ang_data.size(), 2) = temp(0);
+			A(i + ang_data.size(), 3) = temp(1);
 		}
 		else
 		{
-			A(i + 12, 2) = 0;
-			A(i + 12, 3) = 0;
+			A(i + ang_data.size(), 2) = 0;
+			A(i + ang_data.size(), 3) = 0;
 		}
 	}
 };
