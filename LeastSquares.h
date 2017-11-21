@@ -40,8 +40,9 @@ Inputs:																			Type
 - dist_data: vector of struct of the distances observations						[vector<struct>]
 - std_ang: given standard deviation of angles observations						[double]
 - std_dist: given standard deviation of distances observations					[double]
+- apriori: apriori value														[double]
 */
-MatrixXd compute_P_matrix(vector<angles> ang_data, vector<distances> dist_data, double std_ang, double std_dist);
+MatrixXd compute_P_matrix(vector<angles> ang_data, vector<distances> dist_data, double std_ang, double std_dist, double apriori);
 
 /* Function: delta_angle
 Purpose: This Function returns a VectorXd, which contains the delta values of the angles observations

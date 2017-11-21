@@ -1,3 +1,9 @@
+/*
+Author: Juan Carlos Terrazas Borbon
+ID:10130921
+Last Update: 11/21/2017
+Course: ENGO 563
+Lab 1:*/
 #include "LeastSquares.h"
 const double PI = 3.141592653589793;
 
@@ -139,7 +145,7 @@ VectorXd delta_dist(distances temp_dist, vector<coordinates> coords, string id)
 	return temp;
 };
 
-MatrixXd compute_P_matrix(vector<angles> ang_data, vector<distances> dist_data, double std_ang, double std_dist)
+MatrixXd compute_P_matrix(vector<angles> ang_data, vector<distances> dist_data, double std_ang, double std_dist, double apriori)
 {
 	MatrixXd C_l = MatrixXd::Zero((ang_data.size() + dist_data.size()), (ang_data.size() + dist_data.size()));
 	for (int i = 0; i < (ang_data.size() + dist_data.size()); i++)
@@ -149,8 +155,7 @@ MatrixXd compute_P_matrix(vector<angles> ang_data, vector<distances> dist_data, 
 		else
 			C_l(i, i) = pow(std_dist/100,2);
 	}
-	double apriori = pow(1,2);
-	MatrixXd P = apriori * C_l.inverse();
+	MatrixXd P = pow(apriori,2) * C_l.inverse();
 	return P;
 };
 

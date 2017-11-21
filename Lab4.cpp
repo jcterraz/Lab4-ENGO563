@@ -1,16 +1,16 @@
 /*
 Author: Juan Carlos Terrazas Borbon
 ID:10130921
-Last Update: 11/20/2017
-Course: ENGO 553
+Last Update: 11/21/2017
+Course: ENGO 563
 Lab 4:*/
 
 #include "Lab4.h";
-void least_squares(MatrixXd &Res, MatrixXd &P, MatrixXd &A, vector<angles> ang_data, vector<distances> dist_data, vector<coordinates> coords_data, double std_ang, double std_dist)
+void least_squares(MatrixXd &Res, MatrixXd &P, MatrixXd &A, vector<angles> ang_data, vector<distances> dist_data, vector<coordinates> coords_data, double std_ang, double std_dist, double apriori)
 {
 
 // Obtain weight matrix
-P = compute_P_matrix(ang_data, dist_data, std_ang, std_dist);
+P = compute_P_matrix(ang_data, dist_data, std_ang, std_dist, apriori);
 
 MatrixXd S, W, Unk;
 bool tresh = false;
@@ -103,7 +103,7 @@ MatrixXd snooping_method(MatrixXd v, MatrixXd P, MatrixXd A, double apriori, dou
 			}
 		}
 		obs_del = max;
-		cout << "Highest blunder in observation: "<< max+1 << endl;
+		cout << "Highest blunder in observation: " << max + 1 << " with a blunder of " << w(max,0)<< endl;
 	}
 	else
 	{
