@@ -69,14 +69,15 @@ int main() {
 		
 		least_squares(Res, P, A, ang_data, dist_data, coords_data, std_ang, std_dist, 1);
 	}
-	cout << Res.size() << endl;
+
 	// Part 2 Question 2: correlation
 	Corr = correlation_coefficient(Qv_P1);
 	output_matrix("Correlation.txt", Corr);
 
 	// Part 2 Question 4: variance values of the measurements
 	bool check_p4 = false;
-	cout << Res.size();
+	double tolerance = 0.01;
+
 	// Calculate A-Posteriori
 	double Apos = (Res.transpose() * P * Res)(0, 0) / (Res.size() - 4);
 	
@@ -115,22 +116,69 @@ int main() {
 		// Update
 		P_11 = (Apos / Theta(0, 0)) * P_11;
 		P_22 = (Apos / Theta(1, 0)) * P_22;
-
-		// Check
-		if (Theta(0, 0) == Theta(1, 0) == Apos)
+		
+		for (int i = 0; i < P_11.rows(); i++)
 		{
-			check == true;
+			P(i, i) = P_11(i, i);
 		}
+
+		for (int i = 0; i < P_22.rows(); i++)
+		{
+			P(i + P_11.rows(), i + P_11.rows()) = P_22(i, i);
+		}
+		
+		// Check
+		if (abs(Theta(0, 0) - Theta(1,0)) < tolerance && abs(Theta(0, 0) - Apos) < tolerance)
+		{
+			check_p4 = true;
+		}
+
+		cout << abs(Theta(0, 0) - Theta(1, 0)) << endl;
+		cout << abs(Theta(0, 0) - Apos) << endl;
 	}
 
 	double var_ang = Apos / P_11(0, 0);
 	double var_dist = Apos / P_22(0, 0);
 
 	cout << endl << "Number of iterations: " << iterations << endl;
+	cout << "Aposteriori:" << Apos << endl;
 	cout << "Variance of angle observations: " << var_ang << endl;
 	cout << "Variance of distance observations: " << var_dist << endl;
 	cout << "Standard Deviation of angle observations: " << sqrt(var_ang) << endl;
 	cout << "Standard Deviation of distance observations: " << sqrt(var_dist) << endl;
+
+	// Part 2 Question 5: 
+	bool check = false;
+	int obs_del;
+	while (check == false)
+	{
+		Qv_P1 = snooping_method(Res, P, A, 1, 23.68, 2.99, check, obs_del);
+		if (check == true)
+		{
+			break;
+		}
+
+		if (obs_del + 1 < ang_data.size())
+		{
+			ang_data.erase(ang_data.begin() + obs_del);
+		}
+		else
+		{
+			dist_data.erase(dist_data.begin() + (obs_del - ang_data.size()));
+		}
+
+		Res.resize(0, 0);
+		P.resize(0, 0);
+		A.resize(0, 0);
+		Qv_P1.resize(0, 0);
+		Corr.resize(0, 0);
+
+		least_squares(Res, P, A, ang_data, dist_data, coords_data, std_ang, std_dist, 1);
+	}
+
+	// Part 2 Question 2: correlation
+	Corr = correlation_coefficient(Qv_P1);
+	output_matrix("Correlation.txt", Corr);
 
 	return 0;
 }

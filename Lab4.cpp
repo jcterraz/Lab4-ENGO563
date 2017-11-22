@@ -113,6 +113,11 @@ MatrixXd snooping_method(MatrixXd v, MatrixXd P, MatrixXd A, double apriori, dou
 		for (int i = 0; i < v.rows(); i++)
 		{
 			w(i, 0) = v(i, 0) / (sqrt(apriori)*sqrt(Q_v(i, i)));
+
+			if (abs(w(i, 0)) > K)
+			{
+				cout << "Local Test in observation " << i + 1 << "did not pass test with a blunder of: " << w(i, 0) << endl;
+			}
 		}
 		output_matrix("Blunders_Final.txt", w);
 	}
