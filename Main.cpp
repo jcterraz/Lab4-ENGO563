@@ -47,6 +47,10 @@ int main() {
 	while (check == false)
 	{
 		Qv_P1 = snooping_method(Res, P, A, 1, 23.68, 2.99, check, obs_del);
+		if (check == true)
+		{
+			break;
+		}
 
 		if (obs_del + 1 < ang_data.size())
 		{
@@ -56,53 +60,77 @@ int main() {
 		{
 			dist_data.erase(dist_data.begin() + (obs_del - ang_data.size()));
 		}
+
 		Res.resize(0, 0);
 		P.resize(0, 0);
 		A.resize(0, 0);
 		Qv_P1.resize(0, 0);
 		Corr.resize(0, 0);
+		
 		least_squares(Res, P, A, ang_data, dist_data, coords_data, std_ang, std_dist, 1);
 	}
-
+	cout << Res.size() << endl;
 	// Part 2 Question 2: correlation
 	Corr = correlation_coefficient(Qv_P1);
 	output_matrix("Correlation.txt", Corr);
 
 	// Part 2 Question 4: variance values of the measurements
 	bool check_p4 = false;
+	cout << Res.size();
+	// Calculate A-Posteriori
+	double Apos = (Res.transpose() * P * Res)(0, 0) / (Res.size() - 4);
 	
-	// Separate P, V and A
-	for (int i = 0; i < ang_data.size(); i++)
+	// Separate P, V and A		
+	MatrixXd P_11 = P.block(0, 0, ang_data.size(), ang_data.size());
+	MatrixXd P_22 = P.block(ang_data.size(), ang_data.size(), dist_data.size(), dist_data.size());
+
+	MatrixXd A_1 = A.block(0, 0, ang_data.size(), 4);
+	MatrixXd A_2 = A.block(ang_data.size(), 0, dist_data.size(), 4);
+
+	MatrixXd V_1 = Res.block(0, 0, ang_data.size(), 1);
+	MatrixXd V_2 = Res.block(ang_data.size(), 0, dist_data.size(), 1);
+
+	int iterations = 0;
+	// Iteration section
+	while (check_p4 == false)
 	{
-		
-		MatrixXd P_11
+		iterations++;
+
+		MatrixXd N = A.transpose() * P * A;
+
+		MatrixXd N_1 = A_1.transpose() * P_11 * A_1;
+		MatrixXd N_2 = A_2.transpose() * P_22 * A_2;
+
+		MatrixXd W(2, 1);
+		W(0, 0) = (V_1.transpose() * P_11 * V_1)(0,0);
+		W(1, 0) = (V_2.transpose() * P_22 * V_2)(0, 0);
+
+		MatrixXd S(2, 2);
+		S(0, 0) = ang_data.size() - (2 * (N_1 * N.inverse()).trace()) + (N_1 * N.inverse()*N_1 * N.inverse()).trace();
+		S(0, 1) = S(1, 0) = (N_2 * N.inverse() * N_1 * N.inverse()).trace();
+		S(1,1) = dist_data.size() - (2 * (N_2 * N.inverse()).trace()) + (N_2 * N.inverse()*N_2 * N.inverse()).trace();
+
+		MatrixXd Theta = S.inverse() * W;
+
+		// Update
+		P_11 = (Apos / Theta(0, 0)) * P_11;
+		P_22 = (Apos / Theta(1, 0)) * P_22;
+
+		// Check
+		if (Theta(0, 0) == Theta(1, 0) == Apos)
+		{
+			check == true;
+		}
 	}
 
-	MatrixXd N = A.transpose() * P * A;
-	
-	MatrixXd temp(1,A.cols());
-	MatrixXd N1(ang_data.size(), 1);
-	for (int i = 0; i < ang_data.size(); i++)
-	{
-		for (int j = 0; j < A.cols(); j++)
-		{
-			temp(0, j) = A(i, j);
-		}
-		N1(i, 0) = (temp.transpose()*P(i, i)*temp)(0,0);
-		temp.resize(0, A.cols());
-	}
+	double var_ang = Apos / P_11(0, 0);
+	double var_dist = Apos / P_22(0, 0);
 
-	MatrixXd temp(1, A.cols());
-	MatrixXd N2(dist_data.size(), 1);
-	for (int i = 0; i < dist_data.size(); i++)
-	{
-		for (int j = 0; j < A.cols(); j++)
-		{
-			temp(0, j) = A(i+ ang_data.size(), j);
-		}
-		N2(i, 0) = (temp.transpose()*P(i + ang_data.size(), i + ang_data.size())*temp)(0, 0);
-		temp.resize(0, A.cols());
-	}
+	cout << endl << "Number of iterations: " << iterations << endl;
+	cout << "Variance of angle observations: " << var_ang << endl;
+	cout << "Variance of distance observations: " << var_dist << endl;
+	cout << "Standard Deviation of angle observations: " << sqrt(var_ang) << endl;
+	cout << "Standard Deviation of distance observations: " << sqrt(var_dist) << endl;
 
 	return 0;
 }
