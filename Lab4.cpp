@@ -86,6 +86,7 @@ MatrixXd snooping_method(MatrixXd v, MatrixXd P, MatrixXd A, double apriori, dou
 	MatrixXd w(v.rows(), 1), Q_v;
 	bool global_check = false;
 	int max = 0;
+	bool local_check = false;
 	if (T > Chi)
 	{
 		cout << "Global Test Failed: Blunder Detected" << endl;
@@ -117,8 +118,21 @@ MatrixXd snooping_method(MatrixXd v, MatrixXd P, MatrixXd A, double apriori, dou
 			if (abs(w(i, 0)) > K)
 			{
 				cout << "Local Test in observation " << i + 1 << "did not pass test with a blunder of: " << w(i, 0) << endl;
+				local_check = true;
+			}
+			if (i > 0)
+			{
+				if (abs(w(i, 0)) > abs(w(max, 0)))
+				{
+					max = i;
+				}
 			}
 		}
+		if (local_check == false)
+		{
+			cout << "All observations passed local test" << endl;
+		}
+		cout << "Highest blunder in observation: " << max + 1 << " with a blunder of " << w(max, 0) << endl;
 		output_matrix("Blunders_Final.txt", w);
 	}
 
