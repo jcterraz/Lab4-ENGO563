@@ -76,7 +76,7 @@ for (int i = 0; i < (ang_data.size() + dist_data.size()); i++)
 MatrixXd l_hat = l + Res;
 };
 
-MatrixXd snooping_method(MatrixXd v, MatrixXd P, MatrixXd A, double apriori, double Chi, double K, bool &check, int &obs_del)
+MatrixXd snooping_method(MatrixXd v, MatrixXd P, MatrixXd A, double apriori, double Chi, double K, bool &check, int &obs_del, int iter)
 {
 	// Global Test
 	double T = (v.transpose() * P * v)(0, 0) / apriori;
@@ -133,9 +133,8 @@ MatrixXd snooping_method(MatrixXd v, MatrixXd P, MatrixXd A, double apriori, dou
 			cout << "All observations passed local test" << endl;
 		}
 		cout << "Highest blunder in observation: " << max + 1 << " with a blunder of " << w(max, 0) << endl;
-		output_matrix("Blunders_Final.txt", w);
 	}
-
+	output_matrix("Blunders_" + std::to_string(iter) + ".txt", w);
 	return Q_v;
 };
 

@@ -61,9 +61,6 @@ int main() {
 		N_val <<  2.96, 2.935, 2.92;
 	}
 
-	cout << Chi_val << endl;
-	cout << N_val << endl;
-
 	bool check = false;
 	int obs_del;
 	int iter = 0;
@@ -73,7 +70,7 @@ int main() {
 		double N = N_val(iter,0);
 		iter++;
 
-		Qv_P1 = snooping_method(Res, P, A, 1, Chi, N, check, obs_del);
+		Qv_P1 = snooping_method(Res, P, A, 1, Chi, N, check, obs_del, iter);
 
 		Corr = correlation_coefficient(Qv_P1);
 		output_matrix("Correlation_" + std::to_string(iter)+".txt", Corr);
