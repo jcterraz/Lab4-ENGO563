@@ -89,7 +89,7 @@ MatrixXd snooping_method(MatrixXd v, MatrixXd P, MatrixXd A, double apriori, dou
 	bool local_check = false;
 	if (T > Chi)
 	{
-		cout << "Global Test Failed: Blunder Detected" << endl;
+		cout << "Global Test Failed: "<< T << " < " << Chi << endl;
 		Q_v = P.inverse() - A*(A.transpose() * P * A).inverse() * A.transpose();
 		
 		for (int i = 0; i < v.rows(); i++)
@@ -108,7 +108,7 @@ MatrixXd snooping_method(MatrixXd v, MatrixXd P, MatrixXd A, double apriori, dou
 	}
 	else
 	{
-		cout << "Global Test Successfull" << endl;
+		cout << "Global Test Successfull: " << T << " < " << Chi << endl;
 		Q_v = P.inverse() - A*(A.transpose() * P * A).inverse() * A.transpose();
 		check = true;
 		for (int i = 0; i < v.rows(); i++)

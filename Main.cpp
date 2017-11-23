@@ -1,7 +1,7 @@
 /*
 Author: Juan Carlos Terrazas Borbon
 ID:10130921
-Last Update: 11/21/2017
+Last Update: 11/22/2017
 Course: ENGO 563
 Lab 4:*/
 
@@ -42,13 +42,38 @@ int main() {
 	least_squares(Res, P, A, ang_data, dist_data, coords_data, std_ang, std_dist, 1);
 
 	// Part 2 Question 1: statistical tests using data snooping method
+	MatrixXd Chi_val;
+	MatrixXd N_val;
+	if ((ang_data.size() + dist_data.size()) == 18)
+	{
+		Chi_val.resize(5, 1);
+		Chi_val << 23.68, 22.36, 21.03, 19.68, 18.31;
+
+		N_val.resize(5, 1);
+		N_val << 2.99, 2.975, 2.96, 2.935, 2.92;
+	}
+	else
+	{
+		Chi_val.resize(3, 1);
+		Chi_val <<  21.03, 19.68, 18.31;
+
+		N_val.resize(3, 1);
+		N_val <<  2.96, 2.935, 2.92;
+	}
+
+	cout << Chi_val << endl;
+	cout << N_val << endl;
+
 	bool check = false;
 	int obs_del;
 	int iter = 0;
 	while (check == false)
 	{
+		double Chi = Chi_val(iter,0);
+		double N = N_val(iter,0);
 		iter++;
-		Qv_P1 = snooping_method(Res, P, A, 1, 23.68, 2.99, check, obs_del);
+
+		Qv_P1 = snooping_method(Res, P, A, 1, Chi, N, check, obs_del);
 
 		Corr = correlation_coefficient(Qv_P1);
 		output_matrix("Correlation_" + std::to_string(iter)+".txt", Corr);
